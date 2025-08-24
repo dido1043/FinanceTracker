@@ -1,33 +1,22 @@
 package com.example.fintracker.config;
 
+
 import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
+import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.*;
+@Configuration
+public class DotenvInitializer {
 
+    @PostConstruct
+    public void init() {
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .load();
 
-public class DotenvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
-        Dotenv dotenv = Dotenv.load();
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("spring.datasource.url", dotenv.get("DATASOURCE_URL"));
-        properties.put("spring.datasource.username", dotenv.get("DATASOURCE_USER"));
-        properties.put("spring.datasource.password", dotenv.get("DATASOURCE_PASSWORD"));
-        //properties.put("frontend.url", dotenv.get("FRONTEND_URL"));
-
-        ConfigurableEnvironment env = applicationContext.getEnvironment();
-        env.getPropertySources().addFirst(new MapPropertySource("dotenv", properties));
-    }
-
-    private void setEnv(Map<String, Object> props, String springKey, Dotenv dotenv, String envKey) {
-        String value = dotenv.get(envKey);
-        if (value != null) {
-            props.put(springKey, value);
-        }
+        // Set system properties for Spring to use
+        System.setProperty("DATASOURCE_URL", dotenv.get("DATASOURCE_URL"));
+        System.setProperty("DATASOURCE_USER", dotenv.get("DATASOURCE_USER"));
+        System.setProperty("DATASOURCE_PASSWORD", dotenv.get("DATASOURCE_PASSWORD"));
     }
 }
